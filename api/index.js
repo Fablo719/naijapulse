@@ -1,2 +1,2 @@
 
-module.exports= require ("../index.js")
+module.exports= require ("../server.js")
