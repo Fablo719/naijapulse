@@ -1,33 +1,3 @@
-# Environment variables
+node_modules
 .env
-.env.local
-.env.production
-.env.development
-
-# Dependencies
-node_modules/
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-
-# Database
-*.sqlite
-*.db
-
-# IDE
-.vscode/
-.idea/
-.DS_Store
-
-# OS files
-Thumbs.db
-
-# Build files
-dist/
-build/
-
-# Temporary files
-tmp/
-temp/
+.env*
