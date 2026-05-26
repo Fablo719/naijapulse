@@ -1,4 +1,4 @@
-const Post = require("../models/Post.model");
+const Post = require("../models/post.model");
 const User = require("../models/user.model");
 const connectDB = require("../database/connectDB")
 // -------------------- CREATE POST --------------------
