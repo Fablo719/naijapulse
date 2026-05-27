@@ -26,10 +26,13 @@ router.get("/admin/posts", auth, admin, getAllPosts);
 router.post("/createPost", auth, createPost);
 router.get("/getAllPosts", auth, getAllPosts);
 
+
 router.put("/:postId", auth, admin, updatePost);
 router.delete("/admin/post/:postId", auth, admin, deletePost);
 
 router.post("/:postId/comment/:commentId/like", auth, likeComment);
+// Add this line - allows users to delete their own posts
+router.delete("/:postId", auth, deletePost);  // Users can delete their own posts
 
 
 router.delete(  "/:postId/comment/:commentId",  auth,deleteComment);

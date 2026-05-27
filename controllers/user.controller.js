@@ -438,7 +438,7 @@ const forgotPassword = async (req, res) => {
     await user.save();
     
     // Create reset URL (adjust for your frontend URL)
-    const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    const resetURL = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
     
     // Send email (optional - won't break functionality if fails)
     try {
