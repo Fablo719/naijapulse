@@ -27,7 +27,7 @@ router.post("/createPost", auth, createPost);
 router.get("/getAllPosts", auth, getAllPosts);
 
 
-router.put("/:postId", auth, admin, updatePost);
+router.put("/:postId", auth, updatePost);
 router.delete("/admin/post/:postId", auth, admin, deletePost);
 
 router.post("/:postId/comment/:commentId/like", auth, likeComment);
