@@ -13,10 +13,11 @@ const {
   likePost,
   updatePost,
   deletePost,
-  savePost,
-  getSavedPosts,
-  searchPosts,
-  sharePost,
+  // savePost,
+  // getSavedPosts,
+  // searchPosts,
+  // sharePost,
+  getSinglePost,
   getUserResponses
 } = require("../controllers/post.controller");
 
@@ -41,14 +42,14 @@ router.delete(  "/:postId/comment/:commentId",  auth,deleteComment);
 
 router.get("/user/:userId", auth, getUserPosts);
 
-router.get("/search", auth, searchPosts);
-router.post("/:postId/save", auth, savePost);
-router.get("/saved/posts", auth, getSavedPosts);
+// router.get("/search", auth, searchPosts);
+// router.post("/:postId/save", auth, savePost);
+// router.get("/saved/posts", auth, getSavedPosts);
 router.get("/responses/me", auth, getUserResponses);
-
+router.get("/:id", auth, getSinglePost);
 
 router.post("/:postId/like", auth, likePost);
 router.post("/:postId/comment", auth, addComment);
-router.post("/:postId/share", auth, sharePost);
+// router.post("/:postId/share", auth, sharePost);
 
 module.exports = router;

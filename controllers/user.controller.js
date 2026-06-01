@@ -275,17 +275,51 @@ const getAllUsers = async (req, res) => {
 
 // -------------------- DELETE USER --------------------
 const deleteUser = async (req, res) => {
-    await connectDB()
-    const { id } = req.params;
-    try {
-        const user = await User.findByIdAndDelete(id);
-        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+  await connectDB();
 
-        res.status(200).json({ success: true, message: "User deleted successfully" });
-    } catch (error) {
-        console.log(error);
-        res.status(400).json({ success: false, message: "Failed to delete user", error: error.message });
+  const { id } = req.params;
+
+  try {
+    const userToDelete = await User.findById(id);
+
+    if (!userToDelete) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
     }
+
+    // Prevent self delete
+    if (id === req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You cannot delete your own account"
+      });
+    }
+
+    // Prevent deleting admins
+    if (userToDelete.role === "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Admin accounts cannot be deleted"
+      });
+    }
+
+    await User.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "User deleted successfully"
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete user"
+    });
+  }
 };
 
 const updateUserRole = async (req, res) => {

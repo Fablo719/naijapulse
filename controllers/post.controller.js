@@ -1,9 +1,10 @@
 const Post = require("../models/post.model");
 const User = require("../models/user.model");
-const connectDB = require("../database/connectDB")
+const connectDB = require("../database/connectDB");
+
 // -------------------- CREATE POST --------------------
-exports.createPost = async (req, res) => {
-  await connectDB()
+const createPost = async (req, res) => {
+  await connectDB();
   try {
     const { postTitle, postContent, postCategory, postImage } = req.body;
 
@@ -30,8 +31,8 @@ exports.createPost = async (req, res) => {
 };
 
 // -------------------- GET ALL POSTS --------------------
-exports.getAllPosts = async (req, res) => {
-  await connectDB()
+const getAllPosts = async (req, res) => {
+  await connectDB();
   try {
     const posts = await Post.find({ isPublic: true })
       .sort({ createdAt: -1 })
@@ -55,8 +56,8 @@ exports.getAllPosts = async (req, res) => {
 };
 
 // -------------------- GET USER POSTS --------------------
-exports.getUserPosts = async (req, res) => {
-  await connectDB()
+const getUserPosts = async (req, res) => {
+  await connectDB();
   try {
     const { userId } = req.params;
     const posts = await Post.find({ authorId: userId, isPublic: true }).sort({ createdAt: -1 });
@@ -67,8 +68,8 @@ exports.getUserPosts = async (req, res) => {
 };
 
 // -------------------- ADD COMMENT --------------------
-exports.addComment = async (req, res) => {
-  await connectDB()
+const addComment = async (req, res) => {
+  await connectDB();
   try {
     const { comment } = req.body;
     const post = await Post.findById(req.params.postId);
@@ -92,8 +93,10 @@ exports.addComment = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-exports.likeComment = async (req, res) => {
-  await connectDB()
+
+// -------------------- LIKE COMMENT --------------------
+const likeComment = async (req, res) => {
+  await connectDB();
   try {
     const { postId, commentId } = req.params;
 
@@ -146,8 +149,9 @@ exports.likeComment = async (req, res) => {
   }
 };
 
-exports.deleteComment = async (req, res) => {
-  await connectDB()
+// -------------------- DELETE COMMENT --------------------
+const deleteComment = async (req, res) => {
+  await connectDB();
   try {
     const { postId, commentId } = req.params;
 
@@ -169,17 +173,10 @@ exports.deleteComment = async (req, res) => {
       });
     }
 
-    const isCommentOwner =
-      comment.userId.toString() === req.user.id;
+    const isCommentOwner = comment.userId.toString() === req.user.id;
+    const isPostOwner = post.authorId.toString() === req.user.id;
 
-    const isPostOwner =
-      post.authorId.toString() === req.user.id;
-
-    if (
-      !isCommentOwner &&
-      !isPostOwner &&
-      !req.user.isAdmin
-    ) {
+    if (!isCommentOwner && !isPostOwner && !req.user.isAdmin) {
       return res.status(403).json({
         success: false,
         message: "Not authorized"
@@ -187,7 +184,6 @@ exports.deleteComment = async (req, res) => {
     }
 
     post.comments.pull(commentId);
-
     await post.save();
 
     res.status(200).json({
@@ -204,8 +200,8 @@ exports.deleteComment = async (req, res) => {
 };
 
 // -------------------- LIKE / UNLIKE POST --------------------
-exports.likePost = async (req, res) => {
-  await connectDB()
+const likePost = async (req, res) => {
+  await connectDB();
   try {
     const post = await Post.findById(req.params.postId);
 
@@ -246,8 +242,8 @@ exports.likePost = async (req, res) => {
 };
 
 // -------------------- UPDATE POST --------------------
-exports.updatePost = async (req, res) => {
-  await connectDB()
+const updatePost = async (req, res) => {
+  await connectDB();
   try {
     const post = await Post.findById(req.params.postId);
     if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
@@ -264,12 +260,12 @@ exports.updatePost = async (req, res) => {
 };
 
 // -------------------- DELETE POST --------------------
-exports.deletePost = async (req, res) => {
-  await connectDB()
+const deletePost = async (req, res) => {
+  await connectDB();
   try {
     const post = await Post.findById(req.params.postId);
     if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
-     if (post.authorId.toString() !== req.user.id && !req.user.isAdmin) return res.status(403).json({ message: "Not authorized" });
+    if (post.authorId.toString() !== req.user.id && !req.user.isAdmin) return res.status(403).json({ message: "Not authorized" });
 
     await post.deleteOne();
     res.json({ success: true, message: 'Post deleted successfully' });
@@ -278,83 +274,107 @@ exports.deletePost = async (req, res) => {
   }
 };
 
-// -------------------- SAVE / UNSAVE POST --------------------
-exports.savePost = async (req, res) => {
-  await connectDB()
+// -------------------- SAVE / UNSAVE POST (COMMENTED) --------------------
+// const savePost = async (req, res) => {
+//   await connectDB();
+//   try {
+//     const userId = req.user.id;
+//     const { postId } = req.params;
+
+//     const post = await Post.findById(postId);
+//     const user = await User.findById(userId);
+//     if (!post) return res.status(404).json({ message: "Post not found" });
+
+//     const alreadySaved = post.savedBy.includes(userId);
+//     if (alreadySaved) {
+//       post.savedBy = post.savedBy.filter(id => id.toString() !== userId);
+//       user.savedPosts = user.savedPosts.filter(id => id.toString() !== postId);
+//     } else {
+//       post.savedBy.push(userId);
+//       user.savedPosts.push(postId);
+//     }
+
+//     await post.save();
+//     await user.save();
+
+//     res.json({ success: true, saved: !alreadySaved });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
+// // -------------------- GET SAVED POSTS (COMMENTED) --------------------
+// const getSavedPosts = async (req, res) => {
+//   await connectDB();
+//   try {
+//     const user = await User.findById(req.user.id).populate("savedPosts");
+//     res.json({ success: true, posts: user.savedPosts });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
+// // -------------------- SEARCH POSTS (COMMENTED) --------------------
+// const searchPosts = async (req, res) => {
+//   await connectDB();
+//   try {
+//     const { q } = req.query;
+//     const posts = await Post.find({
+//       $or: [
+//         { postTitle: { $regex: q, $options: 'i' } },
+//         { postContent: { $regex: q, $options: 'i' } }
+//       ],
+//       isPublic: true
+//     }).sort({ createdAt: -1 });
+
+//     res.json({ success: true, posts });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
+// // -------------------- SHARE POST (COMMENTED) --------------------
+// const sharePost = async (req, res) => {
+//   await connectDB();
+//   try {
+//     const post = await Post.findById(req.params.postId);
+//     if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+
+//     post.shares += 1;
+//     await post.save();
+//     res.json({ success: true, shares: post.shares });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+const getSinglePost = async (req, res) => {
+  await connectDB();
+
   try {
-    const userId = req.user.id;
-    const { postId } = req.params;
+    const post = await Post.findById(req.params.id);
 
-    const post = await Post.findById(postId);
-    const user = await User.findById(userId);
-    if (!post) return res.status(404).json({ message: "Post not found" });
-
-    const alreadySaved = post.savedBy.includes(userId);
-    if (alreadySaved) {
-      post.savedBy = post.savedBy.filter(id => id.toString() !== userId);
-      user.savedPosts = user.savedPosts.filter(id => id.toString() !== postId);
-    } else {
-      post.savedBy.push(userId);
-      user.savedPosts.push(postId);
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found"
+      });
     }
 
-    await post.save();
-    await user.save();
-
-    res.json({ success: true, saved: !alreadySaved });
+    res.status(200).json({
+      success: true,
+      post
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// -------------------- GET SAVED POSTS --------------------
-exports.getSavedPosts = async (req, res) => {
-  await connectDB()
-  try {
-    const user = await User.findById(req.user.id).populate("savedPosts");
-    res.json({ success: true, posts: user.savedPosts });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// -------------------- SEARCH POSTS --------------------
-exports.searchPosts = async (req, res) => {
-  await connectDB()
-  try {
-    const { q } = req.query;
-    const posts = await Post.find({
-      $or: [
-        { postTitle: { $regex: q, $options: 'i' } },
-        { postContent: { $regex: q, $options: 'i' } }
-      ],
-      isPublic: true
-    }).sort({ createdAt: -1 });
-
-    res.json({ success: true, posts });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// -------------------- SHARE POST --------------------
-exports.sharePost = async (req, res) => {
-  await connectDB()
-  try {
-    const post = await Post.findById(req.params.postId);
-    if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
-
-    post.shares += 1;
-    await post.save();
-    res.json({ success: true, shares: post.shares });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 
 // -------------------- GET USER RESPONSES --------------------
-exports.getUserResponses = async (req, res) => {
-  await connectDB()
+const getUserResponses = async (req, res) => {
+  await connectDB();
   try {
     const posts = await Post.find({ "comments.userId": req.user.id });
     const responses = [];
@@ -376,4 +396,20 @@ exports.getUserResponses = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+// -------------------- EXPORT ALL FUNCTIONS --------------------
+module.exports = {
+  createPost,
+  getAllPosts,
+  getUserPosts,
+  addComment,
+  likeComment,
+  deleteComment,
+  likePost,
+  updatePost,
+  deletePost,
+ 
+  getSinglePost,
+  getUserResponses
 };
