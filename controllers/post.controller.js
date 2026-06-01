@@ -32,26 +32,20 @@ const createPost = async (req, res) => {
 
 // -------------------- GET ALL POSTS --------------------
 const getAllPosts = async (req, res) => {
-  await connectDB();
   try {
-    const posts = await Post.find({ isPublic: true })
-      .sort({ createdAt: -1 })
-      .populate('authorId', 'firstName lastName email profilePicture');
+    const posts = await Post.find()
+      .populate("userId", "firstName lastName email") // 🔥 FIX HERE
+      .sort({ createdAt: -1 });
 
-    const formattedPosts = posts.map(post => ({
-      ...post.toObject(),
-      authorName: post.authorName || `${post.authorId?.firstName || ''} ${post.authorId?.lastName || ''}`.trim() || "Anonymous",
-      comments: post.comments.map(c => ({
-        ...c.toObject(),
-        userName: c.userName || "Anonymous"
-      })),
-      likes: post.likes || []
-    }));
-
-    res.json({ success: true, posts: formattedPosts });
+    res.status(200).json({
+      success: true,
+      posts
+    });
   } catch (error) {
-    console.error('Get all posts error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 
@@ -348,16 +342,12 @@ const deletePost = async (req, res) => {
 //   }
 // };
 const getSinglePost = async (req, res) => {
-  await connectDB();
-
   try {
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.id)
+      .populate("userId", "firstName lastName email");
 
     if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: "Post not found"
-      });
+      return res.status(404).json({ success: false, message: "Post not found" });
     }
 
     res.status(200).json({
